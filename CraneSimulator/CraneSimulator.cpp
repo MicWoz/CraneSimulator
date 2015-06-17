@@ -65,29 +65,9 @@ void MyOnPaint(HDC hdc)
     Pen blue (Color(255, 0, 0, 255));
     Pen red (Color(255, 255, 0, 0));
 
-	int y = 256;
-for (int x = 0; x < 256; x += 5)
-{
-	graphics.DrawLine(&blue, 0, y, x, 0);
-	graphics.DrawLine(&red, 256, x, y, 256);  
-	y -= 5;
-}		
-for (y = 0; y < 256; y++)
-{
-	Pen pen(Color(y, 0, 255,0));
-	// A green pen with shifting alpha 
-	graphics.DrawLine(&pen, 0, y, 256, y); 
-	// The sleep is to slow it down so you can watch the effect 
-	Sleep(20);
-}		
-for (int x = 0; x  < 256;  x++)
-{
-	Pen pen(Color(x, 255, 0, 255));
-	// A green pen with shifting alpha 
-	graphics.DrawLine(&pen, x, 100, x, 200);
-	// The sleep is to slow it down so you can watch the effect
-	Sleep(20); 
-}
+	Image crane(L"Crane.png");
+
+	graphics.DrawRectangle(&red, 0, 0, 100, 100);
 }
 
 //
