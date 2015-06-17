@@ -59,13 +59,13 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	return (int) msg.wParam;
 }
 
-void MyOnPaint(HDC hdc)
+void MyOnPaint(HDC hdc, int x)
 {
 	Graphics graphics(hdc);
     Pen blue (Color(255, 0, 0, 255));
     Pen red (Color(255, 255, 0, 0));
 
-	graphics.DrawLine(&red, 100, 0, 100, 100);
+	graphics.DrawLine(&red, 100, 0, 100, 0.01*x);
 }
 
 //
@@ -160,7 +160,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
-		MyOnPaint(hdc);
+		for(int x = 0; x < 10000; x++) {
+			MyOnPaint(hdc, x);
+		}
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_DESTROY:
