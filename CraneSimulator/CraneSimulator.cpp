@@ -65,9 +65,7 @@ void MyOnPaint(HDC hdc)
     Pen blue (Color(255, 0, 0, 255));
     Pen red (Color(255, 255, 0, 0));
 
-	Image crane(L"Crane.png");
-
-	graphics.DrawRectangle(&red, 0, 0, 100, 100);
+	graphics.DrawLine(&red, 100, 0, 100, 100);
 }
 
 //
@@ -162,7 +160,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
-		// TODO: Add any drawing code here...
 		MyOnPaint(hdc);
 		EndPaint(hWnd, &ps);
 		break;
