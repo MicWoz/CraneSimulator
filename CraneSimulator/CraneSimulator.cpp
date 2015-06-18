@@ -21,6 +21,7 @@ INT x;
 INT y;
 INT Rx;
 INT Ry;
+BOOL Colision;
 int col = 0;
 
 // Forward declarations of functions included in this code module:
@@ -40,6 +41,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	y = 100;
 	Rx = 400;
 	Ry = 400;
+	Colision = FALSE;
 
  	// TODO: Place code here.
 	MSG msg;
@@ -222,6 +224,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				case VK_LEFT:
 					KillTimer(hWnd, TMR_4);
 				break;
+				case VK_SPACE:
+					Colision = !Colision;
+				break;
 			}
 			break;
 		case WM_TIMER:
@@ -229,38 +234,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 			case TMR_1:
 				repaintWindow(hWnd, hdc, ps);
-				if(Ry == y && Rx > x && x > Rx-100) {
+				if(Ry == y && Rx > x && x > Rx-100 && Colision == TRUE) {
 					y++;
 					Ry++;
 				}
+				else if(Ry == y && Rx > x && x > Rx-100 && Colision == FALSE) y = y;
 				else y++;
 			break;
 			case TMR_2:
 				repaintWindow(hWnd, hdc, ps);
-				if(Ry == y && Rx > x && x > Rx-100) {
+				if(Ry == y && Rx > x && x > Rx-100 && Colision == TRUE) {
 					if(y > 0) {
 						y--;
 						Ry--;
 					}
 				}
+				else if(Ry == y && Rx > x && x > Rx-100 && Colision == FALSE) y = y;
 				else y--;
 			break;
 			case TMR_3:
 				repaintWindow(hWnd, hdc, ps);
-				if(Ry == y && Rx > x && x > Rx-100) {
+				if(Ry == y && Rx > x && x > Rx-100 && Colision == TRUE) {
 					x++;
 					Rx++;
 				}
+				else if(Ry == y && Rx > x && x > Rx-100 && Colision == FALSE) x = x;
 				else x++;
 			break;
 			case TMR_4:
 				repaintWindow(hWnd, hdc, ps);
-				if(Ry == y && Rx > x && x > Rx-100) {
+				if(Ry == y && Rx > x && x > Rx-100 && Colision == TRUE) {
 					if(x > 0) {
 						x--;
 						Rx--;
 					}
 				}
+				else if(Ry == y && Rx > x && x > Rx-100 && Colision == FALSE) x = x;
 				else x--;		
 			break;
 			}
