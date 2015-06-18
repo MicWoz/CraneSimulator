@@ -138,6 +138,27 @@ int OnCreate(HWND window)
 	return 0;
 }
 
+int CheckPosition(int number) {
+	int tab[4];
+	int tabi = 0;
+	for(int t = 0; t < 4; t++) {
+		if((data[number].X >= data[t].X && data[number].X <= data[t].X+50) || (data[number].X+50 >= data[t].X && data[number].X+50 <= data[t].X+50)) {
+			if(number != t) {
+				tab[tabi] = t;
+				tabi++;
+			}
+		}
+	}
+	if(tabi > 0) {
+		for(int tabin = 0; tabin < tabi; tabin++) {
+			if(data[tab[tabin]].Y < 100) return 6;
+			else if(data[tab[tabin]].Y < 400) return tab[tabin];
+		}
+		return tab[0];
+	}
+	return 5;
+}
+
 bool CheckColision(int f) {
 	if(data[f].Y-160 == y && data[f].X < x && data[f].X+50 > x) return TRUE;
 	else return FALSE;
@@ -224,6 +245,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
 	int Colisions = 0;
+	int ColisionsPosition = 5;
+	int ColisionsBottom = 5;
 	PAINTSTRUCT ps;
 	HDC hdc;
 
@@ -261,8 +284,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					SetTimer(hWnd, TMR_4, 10, 0);
 				break;
 				case VK_SPACE:
-					Colision = !Colision;
-					if(Colision == FALSE) SetTimer(hWnd, TMR_5, 10, 0);
+					for(int num = 0; num < 4; num++) {
+						if(CheckColision(num) == TRUE) {
+							ColisionsBottom = CheckPosition(num);
+							if(ColisionsBottom < 5) ColisionsPosition = num;
+							else ColisionsPosition = 5;
+						}
+					}
+					if(ColisionsBottom != 6) {
+						Colision = !Colision;
+						if(Colision == FALSE) SetTimer(hWnd, TMR_5, 10, 0);
+					}
 				break;
 			}
 			break;
@@ -335,15 +367,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 			case TMR_5:
 				repaintWindow(hWnd, hdc, ps);
-				for(int i = 0; i < 3; i++) {
-					if(data[i].Y < 580) {
-						if(data[i].Y+50 == data[1].Y || data[i].Y+50 == data[2].Y || data[i].Y+50 == data[0].Y) {
-							Colisions++;
-							data[i].Y--;
-						}
-						data[i].Y++;
-					}		
-					if(data[i].Y == 580) Colisions++;
+				if(ColisionsPosition < 5) {
+					if(ColisionsBottom < 5) {
+						if(data[ColisionsPosition].Y < data[ColisionsBottom].Y) data[ColisionsPosition].Y--;
+						else if(data[ColisionsPosition].Y == data[ColisionsBottom].Y) Colisions = 3; 
+					}
+					else {
+						if(data[ColisionsPosition].Y < 580) data[ColisionsPosition].Y--;
+						if(data[ColisionsPosition].Y == 580) Colisions = 3;
+					}
 				}
 				if(Colisions == 3) {
 					Colisions = 0;
