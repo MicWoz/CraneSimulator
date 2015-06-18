@@ -51,7 +51,7 @@
     <Image Include="CraneSimulator.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\MySecondTry\MySecondTry\Resources\Crane.png">
+    <Image Include="Crane.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

@@ -20,10 +20,8 @@ TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
 
 INT x;
 INT y;
-INT Rx;
-INT Ry;
 BOOL Colision;
-int col = 0;
+std::vector<Point> data;
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -38,10 +36,8 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
-	x = 100;
+	x = 740;
 	y = 100;
-	Rx = 400;
-	Ry = 400;
 	Colision = FALSE;
 
  	// TODO: Place code here.
@@ -80,26 +76,78 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	return (int) msg.wParam;
 }
 
-void MyOnPaint(HDC hdc)
-{
-	Graphics graphics(hdc);
+void update (HWND hwnd, HDC hdc)
+{	  
+ RECT rcClient;
+   ::GetClientRect(hwnd, &rcClient);
+   int left = rcClient.left;
+   int top = rcClient.top;
+   int width = rcClient.right - rcClient.left;
+   int height = rcClient.bottom - rcClient.top;
+
+   HDC hdcMem = ::CreateCompatibleDC(hdc);
+   const int nMemDC = ::SaveDC(hdcMem);
+
+   HBITMAP hBitmap = ::CreateCompatibleBitmap(hdc, width, height);
+   ::SelectObject(hdcMem, hBitmap);
+
+   Graphics graphics(hdcMem);
+   SolidBrush back(Color(255,255,255));
+   graphics.FillRectangle(&back, left, top, width, height);
+
+   Pen black(Color(255, 0, 0, 0), 4);
     Pen blue (Color(255, 0, 0, 255));
     Pen red (Color(255, 255, 0, 0));
+	Pen MyPen(Color(150, 0, 0, 0));
+	SolidBrush grey(Color(255, 128, 128, 128));
 
-	graphics.DrawRectangle(&red, 0+Rx, 0+Ry, 100, 100);
-	graphics.DrawLine(&red, 100+x, 0, 100+x, 0+y);
+	Image image(L"Crane.png");
+
+	for(int i = 0; i < 3; i++) {
+		graphics.DrawRectangle(&MyPen, data[i].X, data[i].Y, 50, 50);
+	}
+	graphics.FillRectangle(&grey, 0, 630, 1200, 630);
+	graphics.DrawEllipse(&MyPen, data[3].X, data[3].Y, 50, 50);
+	graphics.DrawLine(&MyPen, 0, 630, 1200, 630);
+	graphics.DrawLine(&MyPen, x, 160, x, 160+y);
+	graphics.DrawImage(&image, 10, 10);
+
+   RECT rcClip;
+   ::GetClipBox(hdc, &rcClip);
+   left = rcClip.left;
+   top = rcClip.top;
+   width = rcClip.right - rcClip.left;
+   height = rcClip.bottom - rcClip.top;
+   ::BitBlt(hdc, left, top, width, height, hdcMem, left, top, SRCCOPY);
+
+   ::RestoreDC(hdcMem, nMemDC);
+   ::DeleteObject(hBitmap);
 }
 
-void MyBackgroundPaint(HDC hdc)
-{
+void inputData()
+{	
+	data.push_back(Point(300, 580));
+	for (int i = 1; i < 4; i++){
+		data.push_back(Point(300+100*i, 580));
+	}
+}
 
+int OnCreate(HWND window)
+{
+	inputData();
+	return 0;
+}
+
+bool CheckColision(int f) {
+	if(data[f].Y-160 == y && data[f].X < x && data[f].X+50 > x) return TRUE;
+	else return FALSE;
 }
 
 void repaintWindow(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 {
 	InvalidateRect(hWnd, NULL, TRUE);
 	hdc = BeginPaint(hWnd, &ps);
-	MyOnPaint(hdc);
+	update(hWnd, hdc);
 	EndPaint(hWnd, &ps);
 }
 
@@ -146,7 +194,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hInst = hInstance; // Store instance handle in our global variable
 
    hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+      CW_USEDEFAULT, 0, 800, 750, NULL, NULL, hInstance, NULL);
+
+   OnCreate(hWnd);
 
    if (!hWnd)
    {
@@ -158,6 +208,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    return TRUE;
 }
+
 
 //
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
@@ -172,6 +223,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
+	int Colisions = 0;
 	PAINTSTRUCT ps;
 	HDC hdc;
 
@@ -197,20 +249,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			switch (wParam)
 			{
 				case VK_DOWN:
-					SetTimer(hWnd, TMR_1, 25, 0);
+					SetTimer(hWnd, TMR_1, 10, 0);
 				break;
 				case VK_UP:
-					SetTimer(hWnd, TMR_2, 25, 0);
+					SetTimer(hWnd, TMR_2, 10, 0);
 				break;
 				case VK_RIGHT:
-					SetTimer(hWnd, TMR_3, 25, 0);
+					SetTimer(hWnd, TMR_3, 10, 0);
 				break;
 				case VK_LEFT:
-					SetTimer(hWnd, TMR_4, 25, 0);
+					SetTimer(hWnd, TMR_4, 10, 0);
 				break;
 				case VK_SPACE:
 					Colision = !Colision;
-					if(Colision == FALSE) SetTimer(hWnd, TMR_5, 25, 0);
+					if(Colision == FALSE) SetTimer(hWnd, TMR_5, 10, 0);
 				break;
 			}
 			break;
@@ -236,55 +288,77 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 			case TMR_1:
 				repaintWindow(hWnd, hdc, ps);
-				if(Ry == y && Rx > x && x > Rx-100 && Colision == TRUE) {
-					y++;
-					Ry++;
+				for(int i = 0; i < 4; i++) {
+					if(i != 3 && CheckColision(i) == TRUE && Colision == TRUE) {
+						if(data[i].Y < 580) {
+							data[i].Y++;
+						}
+					}
+					else if(CheckColision(i) == TRUE && Colision == FALSE) y--;
 				}
-				else if(Ry == y && Rx > x && x > Rx-100 && Colision == FALSE) y = y;
+				if(y+160 >= 580 && Colision == TRUE) y = y;
 				else y++;
 			break;
 			case TMR_2:
 				repaintWindow(hWnd, hdc, ps);
-				if(Ry == y && Rx > x && x > Rx-100 && Colision == TRUE) {
-					if(y > 0) {
-						y--;
-						Ry--;
+				for(int i = 0; i < 3; i++) {
+					if(i != 3 && CheckColision(i) == TRUE && Colision == TRUE) {
+						if(y > 0) {
+							data[i].Y--;
+						}
 					}
 				}
-				else y--;
+				if(y < 0 && Colision == TRUE) y = y;
+				else if(y > 0) y--;
 			break;
 			case TMR_3:
 				repaintWindow(hWnd, hdc, ps);
-				if(Ry == y && Rx > x && x > Rx-100 && Colision == TRUE) {
-					x++;
-					Rx++;
+				for(int i = 0; i < 3; i++) {
+					if(CheckColision(i) == TRUE && Colision == TRUE) {
+						if(x <= 740){
+							data[i].X++;
+						}
+					}
 				}
-				else x++;
+				if (x <= 740) x++;
 			break;
 			case TMR_4:
 				repaintWindow(hWnd, hdc, ps);
-				if(Ry == y && Rx > x && x > Rx-100 && Colision == TRUE) {
-					if(x > 0) {
-						x--;
-						Rx--;
+				for(int i = 0; i < 3; i++) {
+					if(CheckColision(i) == TRUE && Colision == TRUE) {
+						if(x >= 280) {
+							data[i].X--;
+						}
 					}
 				}
-				else x--;		
+				if (x >= 280) x--;		
 			break;
 			case TMR_5:
 				repaintWindow(hWnd, hdc, ps);
-				if(Ry < 400) {
-					Ry++;
-				}		
-				if(Ry == 400) KillTimer(hWnd, TMR_5);
+				for(int i = 0; i < 3; i++) {
+					if(data[i].Y < 580) {
+						if(data[i].Y+50 == data[1].Y || data[i].Y+50 == data[2].Y || data[i].Y+50 == data[0].Y) {
+							Colisions++;
+							data[i].Y--;
+						}
+						data[i].Y++;
+					}		
+					if(data[i].Y == 580) Colisions++;
+				}
+				if(Colisions == 3) {
+					Colisions = 0;
+					KillTimer(hWnd, TMR_5);
+				}
 			break;
 			}
 		case WM_PAINT:
 			hdc = BeginPaint(hWnd, &ps);
-			MyBackgroundPaint(hdc);
-			MyOnPaint(hdc);
+			update(hWnd, hdc);
 			EndPaint(hWnd, &ps);
 			break;
+		case WM_ERASEBKGND:
+			return FALSE;
+		break;
 		case WM_DESTROY:
 			PostQuitMessage(0);
 			break;

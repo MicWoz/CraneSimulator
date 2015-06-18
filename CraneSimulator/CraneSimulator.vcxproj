@@ -96,7 +96,7 @@
     <ResourceCompile Include="CraneSimulator.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\MySecondTry\MySecondTry\Resources\Crane.png" />
+    <Image Include="Crane.png" />
     <Image Include="CraneSimulator.ico" />
     <Image Include="small.ico" />
   </ItemGroup>
