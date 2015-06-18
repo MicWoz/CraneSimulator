@@ -20,6 +20,8 @@ TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
 
 INT x;
 INT y;
+INT ColisionsPosition;
+INT ColisionsBottom;
 BOOL Colision;
 std::vector<Point> data;
 
@@ -38,6 +40,8 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	x = 740;
 	y = 100;
+	ColisionsPosition = 5;
+	ColisionsBottom = 5;
 	Colision = FALSE;
 
  	// TODO: Place code here.
@@ -103,11 +107,11 @@ void update (HWND hwnd, HDC hdc)
 
 	Image image(L"Crane.png");
 
-	for(int i = 0; i < 3; i++) {
+	for(int i = 0; i < 4; i++) {
 		graphics.DrawRectangle(&MyPen, data[i].X, data[i].Y, 50, 50);
 	}
 	graphics.FillRectangle(&grey, 0, 630, 1200, 630);
-	graphics.DrawEllipse(&MyPen, data[3].X, data[3].Y, 50, 50);
+	graphics.DrawEllipse(&MyPen, data[4].X, data[4].Y, 50, 50);
 	graphics.DrawLine(&MyPen, 0, 630, 1200, 630);
 	graphics.DrawLine(&MyPen, x, 160, x, 160+y);
 	graphics.DrawImage(&image, 10, 10);
@@ -127,7 +131,7 @@ void update (HWND hwnd, HDC hdc)
 void inputData()
 {	
 	data.push_back(Point(300, 580));
-	for (int i = 1; i < 4; i++){
+	for (int i = 1; i < 5; i++){
 		data.push_back(Point(300+100*i, 580));
 	}
 }
@@ -149,13 +153,12 @@ int CheckPosition(int number) {
 			}
 		}
 	}
-	if(tabi > 0) {
-		for(int tabin = 0; tabin < tabi; tabin++) {
-			if(data[tab[tabin]].Y < 100) return 6;
-			else if(data[tab[tabin]].Y < 400) return tab[tabin];
-		}
-		return tab[0];
+	if(tabi == 1) return tab[0];
+	if(tabi == 2) {
+		if(data[tab[0]].Y == 580) return tab[1];
+		else return tab[0];
 	}
+	if(tabi == 3) return 6;
 	return 5;
 }
 
@@ -245,8 +248,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
 	int Colisions = 0;
-	int ColisionsPosition = 5;
-	int ColisionsBottom = 5;
 	PAINTSTRUCT ps;
 	HDC hdc;
 
@@ -287,8 +288,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					for(int num = 0; num < 4; num++) {
 						if(CheckColision(num) == TRUE) {
 							ColisionsBottom = CheckPosition(num);
-							if(ColisionsBottom < 5) ColisionsPosition = num;
-							else ColisionsPosition = 5;
+							ColisionsPosition = num;
 						}
 					}
 					if(ColisionsBottom != 6) {
@@ -320,8 +320,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 			case TMR_1:
 				repaintWindow(hWnd, hdc, ps);
-				for(int i = 0; i < 4; i++) {
-					if(i != 3 && CheckColision(i) == TRUE && Colision == TRUE) {
+				for(int i = 0; i < 5; i++) {
+					if(i != 4 && CheckColision(i) == TRUE && Colision == TRUE) {
 						if(data[i].Y < 580) {
 							data[i].Y++;
 						}
@@ -333,8 +333,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 			case TMR_2:
 				repaintWindow(hWnd, hdc, ps);
-				for(int i = 0; i < 3; i++) {
-					if(i != 3 && CheckColision(i) == TRUE && Colision == TRUE) {
+				for(int i = 0; i < 5; i++) {
+					if(i != 4 && CheckColision(i) == TRUE && Colision == TRUE) {
 						if(y > 0) {
 							data[i].Y--;
 						}
@@ -345,7 +345,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 			case TMR_3:
 				repaintWindow(hWnd, hdc, ps);
-				for(int i = 0; i < 3; i++) {
+				for(int i = 0; i < 4; i++) {
 					if(CheckColision(i) == TRUE && Colision == TRUE) {
 						if(x <= 740){
 							data[i].X++;
@@ -356,7 +356,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 			case TMR_4:
 				repaintWindow(hWnd, hdc, ps);
-				for(int i = 0; i < 3; i++) {
+				for(int i = 0; i < 4; i++) {
 					if(CheckColision(i) == TRUE && Colision == TRUE) {
 						if(x >= 280) {
 							data[i].X--;
@@ -367,13 +367,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 			case TMR_5:
 				repaintWindow(hWnd, hdc, ps);
-				if(ColisionsPosition < 5) {
-					if(ColisionsBottom < 5) {
-						if(data[ColisionsPosition].Y < data[ColisionsBottom].Y) data[ColisionsPosition].Y--;
-						else if(data[ColisionsPosition].Y == data[ColisionsBottom].Y) Colisions = 3; 
+				if(ColisionsPosition < 4) {
+					if(ColisionsBottom < 4) {
+						if(data[ColisionsPosition].Y+50 < data[ColisionsBottom].Y) data[ColisionsPosition].Y++;
+						else if(data[ColisionsPosition].Y+50 == data[ColisionsBottom].Y) Colisions = 3; 
 					}
-					else {
-						if(data[ColisionsPosition].Y < 580) data[ColisionsPosition].Y--;
+					else if(ColisionsBottom == 5) {
+						if(data[ColisionsPosition].Y < 580) data[ColisionsPosition].Y++;
 						if(data[ColisionsPosition].Y == 580) Colisions = 3;
 					}
 				}
