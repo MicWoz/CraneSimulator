@@ -276,6 +276,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				if(Ry < 400) {
 					Ry++;
 				}		
+				if(Ry == 400) KillTimer(hWnd, TMR_5);
 			break;
 			}
 		case WM_PAINT:
