@@ -19,6 +19,8 @@ TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
 
 INT x;
 INT y;
+INT Rx;
+INT Ry;
 int col = 0;
 
 // Forward declarations of functions included in this code module:
@@ -36,6 +38,8 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	x = 100;
 	y = 100;
+	Rx = 400;
+	Ry = 400;
 
  	// TODO: Place code here.
 	MSG msg;
@@ -78,7 +82,14 @@ void MyOnPaint(HDC hdc)
 	Graphics graphics(hdc);
     Pen blue (Color(255, 0, 0, 255));
     Pen red (Color(255, 255, 0, 0));
+
+	graphics.DrawRectangle(&red, 0+Rx, 0+Ry, 100, 100);
 	graphics.DrawLine(&red, 100+x, 0, 100+x, 0+y);
+}
+
+void MyBackgroundPaint(HDC hdc)
+{
+
 }
 
 void repaintWindow(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
@@ -218,23 +229,45 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 			case TMR_1:
 				repaintWindow(hWnd, hdc, ps);
-				y++;
+				if(Ry == y && Rx > x && x > Rx-100) {
+					y++;
+					Ry++;
+				}
+				else y++;
 			break;
 			case TMR_2:
 				repaintWindow(hWnd, hdc, ps);
-				y--;			
+				if(Ry == y && Rx > x && x > Rx-100) {
+					if(y > 0) {
+						y--;
+						Ry--;
+					}
+				}
+				else y--;
 			break;
 			case TMR_3:
 				repaintWindow(hWnd, hdc, ps);
-				x++;
+				if(Ry == y && Rx > x && x > Rx-100) {
+					x++;
+					Rx++;
+				}
+				else x++;
 			break;
 			case TMR_4:
 				repaintWindow(hWnd, hdc, ps);
-				x--;			
+				if(Ry == y && Rx > x && x > Rx-100) {
+					if(x > 0) {
+						x--;
+						Rx--;
+					}
+				}
+				else x--;		
 			break;
 			}
 		case WM_PAINT:
 			hdc = BeginPaint(hWnd, &ps);
+			MyBackgroundPaint(hdc);
+			MyOnPaint(hdc);
 			EndPaint(hWnd, &ps);
 			break;
 		case WM_DESTROY:
