@@ -3,13 +3,23 @@
 
 #include "stdafx.h"
 #include "CraneSimulator.h"
+#include <vector>
+#include <cstdio>
 
 #define MAX_LOADSTRING 100
+#define TMR_1 1
+#define TMR_2 2
+#define TMR_3 3
+#define TMR_4 4
 
 // Global Variables:
 HINSTANCE hInst;								// current instance
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
+
+INT x;
+INT y;
+int col = 0;
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -24,10 +34,14 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
+	x = 100;
+	y = 100;
 
  	// TODO: Place code here.
 	MSG msg;
 	HACCEL hAccelTable;
+
+
 	GdiplusStartupInput gdiplusStartupInput;
     ULONG_PTR           gdiplusToken;
     GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
@@ -59,13 +73,20 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	return (int) msg.wParam;
 }
 
-void MyOnPaint(HDC hdc, int x)
+void MyOnPaint(HDC hdc)
 {
 	Graphics graphics(hdc);
     Pen blue (Color(255, 0, 0, 255));
     Pen red (Color(255, 255, 0, 0));
+	graphics.DrawLine(&red, 100+x, 0, 100+x, 0+y);
+}
 
-	graphics.DrawLine(&red, 100, 0, 100, 0.01*x);
+void repaintWindow(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
+{
+	InvalidateRect(hWnd, NULL, TRUE);
+	hdc = BeginPaint(hWnd, &ps);
+	MyOnPaint(hdc);
+	EndPaint(hWnd, &ps);
 }
 
 //
@@ -140,37 +161,88 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	PAINTSTRUCT ps;
 	HDC hdc;
 
-	switch (message)
-	{
-	case WM_COMMAND:
-		wmId    = LOWORD(wParam);
-		wmEvent = HIWORD(wParam);
-		// Parse the menu selections:
-		switch (wmId)
+		switch (message)
 		{
-		case IDM_ABOUT:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+		case WM_COMMAND:
+			wmId    = LOWORD(wParam);
+			wmEvent = HIWORD(wParam);
+			// Parse the menu selections:
+			switch (wmId)
+			{
+			case IDM_ABOUT:
+				DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+				break;
+			case IDM_EXIT:
+				DestroyWindow(hWnd);
+				break;
+			default:
+				return DefWindowProc(hWnd, message, wParam, lParam);
+			}
 			break;
-		case IDM_EXIT:
-			DestroyWindow(hWnd);
+		case WM_KEYDOWN:
+			switch (wParam)
+			{
+				case VK_DOWN:
+					SetTimer(hWnd, TMR_1, 25, 0);
+				break;
+				case VK_UP:
+					SetTimer(hWnd, TMR_2, 25, 0);
+				break;
+				case VK_RIGHT:
+					SetTimer(hWnd, TMR_3, 25, 0);
+				break;
+				case VK_LEFT:
+					SetTimer(hWnd, TMR_4, 25, 0);
+				break;
+			}
+			break;
+		case WM_KEYUP:
+			switch (wParam)
+			{
+				case VK_DOWN:
+					KillTimer(hWnd, TMR_1);
+				break;
+				case VK_UP:
+					KillTimer(hWnd, TMR_2);
+				break;
+				case VK_RIGHT:
+					KillTimer(hWnd, TMR_3);
+				break;
+				case VK_LEFT:
+					KillTimer(hWnd, TMR_4);
+				break;
+			}
+			break;
+		case WM_TIMER:
+			switch (wParam)
+			{
+			case TMR_1:
+				repaintWindow(hWnd, hdc, ps);
+				y++;
+			break;
+			case TMR_2:
+				repaintWindow(hWnd, hdc, ps);
+				y--;			
+			break;
+			case TMR_3:
+				repaintWindow(hWnd, hdc, ps);
+				x++;
+			break;
+			case TMR_4:
+				repaintWindow(hWnd, hdc, ps);
+				x--;			
+			break;
+			}
+		case WM_PAINT:
+			hdc = BeginPaint(hWnd, &ps);
+			EndPaint(hWnd, &ps);
+			break;
+		case WM_DESTROY:
+			PostQuitMessage(0);
 			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
-		break;
-	case WM_PAINT:
-		hdc = BeginPaint(hWnd, &ps);
-		for(int x = 0; x < 10000; x++) {
-			MyOnPaint(hdc, x);
-		}
-		EndPaint(hWnd, &ps);
-		break;
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		break;
-	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
-	}
 	return 0;
 }
 
