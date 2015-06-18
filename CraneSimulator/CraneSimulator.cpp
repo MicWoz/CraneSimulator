@@ -11,6 +11,7 @@
 #define TMR_2 2
 #define TMR_3 3
 #define TMR_4 4
+#define TMR_5 5
 
 // Global Variables:
 HINSTANCE hInst;								// current instance
@@ -207,6 +208,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				case VK_LEFT:
 					SetTimer(hWnd, TMR_4, 25, 0);
 				break;
+				case VK_SPACE:
+					Colision = !Colision;
+					if(Colision == FALSE) SetTimer(hWnd, TMR_5, 25, 0);
+				break;
 			}
 			break;
 		case WM_KEYUP:
@@ -223,9 +228,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				break;
 				case VK_LEFT:
 					KillTimer(hWnd, TMR_4);
-				break;
-				case VK_SPACE:
-					Colision = !Colision;
 				break;
 			}
 			break;
@@ -249,7 +251,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						Ry--;
 					}
 				}
-				else if(Ry == y && Rx > x && x > Rx-100 && Colision == FALSE) y = y;
 				else y--;
 			break;
 			case TMR_3:
@@ -258,7 +259,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					x++;
 					Rx++;
 				}
-				else if(Ry == y && Rx > x && x > Rx-100 && Colision == FALSE) x = x;
 				else x++;
 			break;
 			case TMR_4:
@@ -269,8 +269,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						Rx--;
 					}
 				}
-				else if(Ry == y && Rx > x && x > Rx-100 && Colision == FALSE) x = x;
 				else x--;		
+			break;
+			case TMR_5:
+				repaintWindow(hWnd, hdc, ps);
+				if(Ry < 400) {
+					Ry++;
+				}		
 			break;
 			}
 		case WM_PAINT:
